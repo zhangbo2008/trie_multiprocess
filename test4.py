@@ -97,6 +97,19 @@ class DFAFilter():
         self.keyword_chains = {}
         self.delimit = '\x00'  #这是一个不可见字符,看起来跟''一样,但是实际上不一样! 他作为结尾符很适合!
 
+
+    def delete(self, keyword):
+        pass
+
+
+
+
+
+
+
+
+
+
     def add(self, keyword):
         if not isinstance(keyword, str):
             keyword = keyword.decode('utf-8')
@@ -272,7 +285,7 @@ class DFAFilter():
         return out
 
 
-
+#===========提供一个队列q接口.
     def pipei_longest2(self, message, q):
             if not isinstance(message, str):
                 message = message.decode('utf-8')
@@ -497,16 +510,18 @@ if 0:
 
 from multiprocessing import Process
 import multiprocessing
-
+import os
 if 1:
+    print('cpushulaign',os.cpu_count())
+    cpu_c=os.cpu_count()
     t=time.time()
-    pool = multiprocessing.Pool(processes=4) # 创建4个进程
+    pool = multiprocessing.Pool(processes=cpu_c) # 创建4个进程
     results = []
     half=len(wenben)//2
 
-    results.append(pool.apply_async(gfw.pipei_longest, (wenben[:half], )))
-    results.append(pool.apply_async(gfw.pipei_longest, (wenben[half:], )))
-    results.append(pool.apply_async(gfw.pipei_longest, (wenben[half-max_token_len-1:half+max_token_len-1], )))
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[:half], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[half:], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[half-max_token_len-1:half+max_token_len-1], )).get())
    
 
 
@@ -515,10 +530,50 @@ if 1:
 
     pool.close() # 关闭进程池，表示不能再往进程池中添加进程，需要在join之前调用
     pool.join() # 等待进程池中的所有进程执行完毕
-    print ("Sub-process(es) done.")
+    # print ("Sub-process(es) done.")
   
     # for res in results:
     #     print (res.get())
-    print(len(results),'333333333333333333333')
+    print(len(results),'并发匹配到的结果数量.')
 
     print('并发查询时间',time.time()-t)
+
+
+
+print('下面测试更高的并发.')
+from multiprocessing import Process
+import multiprocessing
+import os
+if 1:
+    print('cpushulaign',os.cpu_count())
+    cpu_c=os.cpu_count()
+    t=time.time()
+    pool = multiprocessing.Pool(processes=cpu_c) # 创建4个进程
+    results = []
+    bingfa=3
+    p1=len(wenben)//bingfa
+    p2=p1*2
+
+
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[:p1], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[p1:p2], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[p2:], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[p1-max_token_len-1:p1+max_token_len-1], )).get())
+    results+=(pool.apply_async(gfw.pipei_longest, (wenben[p2-max_token_len-1:p2+max_token_len-1], )).get())
+
+
+
+
+
+    pool.close() # 关闭进程池，表示不能再往进程池中添加进程，需要在join之前调用
+    pool.join() # 等待进程池中的所有进程执行完毕
+    # print ("Sub-process(es) done.")
+  
+    # for res in results:
+    #     print (res.get())
+    print(len(results),'并发匹配到的结果数量.')
+
+    print('并发查询时间',time.time()-t)
+
+
+#=trie树资料:======https://maimai.cn/article/detail?fid=1390986695&efid=n4cfuX764RO4_UAMy84PRQ    
