@@ -396,7 +396,7 @@ if __name__ == "__main__":
 
     t=time.time()
     gfw = DFAFilter() # 本质就是中文trie树的实现. 很简单.
-    gfw.parse("keywords")
+    gfw.parse("keywords_back")
     print('建立trie树需要的时间',time.time()-t)
 
     import time
